@@ -192,7 +192,7 @@ def start_screen():
 
 def level1():
     lev = True
-
+    win = False
     score = 0
     platform = Platform(400 // 2 - 100, 700 - 100, 100)
     platform_group.add(platform)
@@ -230,6 +230,13 @@ def level1():
         player.draw()
         pygame.draw.rect(screen, pygame.Color(255, 209, 220), (400, 0, 300, 700))
 
+        font = pygame.font.Font(None, 30)
+        rend = font.render(f"Цель: набрать счёт 2000", 1, pygame.Color((93, 155, 155)))
+        intro_rect = rend.get_rect()
+        intro_rect.top = 20
+        intro_rect.x = 420
+        screen.blit(rend, intro_rect)
+
         font = pygame.font.Font(None, 50)
         rend = font.render(f"Счёт: {score}", 1, pygame.Color((93, 155, 155)))
         intro_rect = rend.get_rect()
@@ -256,7 +263,8 @@ def level1():
                 run = False
 
             if score >= 2000:
-                game_over_screen_Levels()
+                win = True
+                game_over_screen(lev, win)
 
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.pos[0] >= intro_rect_b.x and event.pos[0] <= intro_rect_b.right and \
@@ -281,13 +289,16 @@ def level5():
     pass
 
 
-def game_over_screen(lev=False):
+def game_over_screen(lev=False, win=False):
     lev = lev
     fon = pygame.transform.scale(load_image('gameover.jpg'), screen_size)
     screen.blit(fon, (0, 0))
-
-    font = pygame.font.Font(None, 125)
-    rend = font.render(f"Вы упали", 1, pygame.Color((127, 199, 255)))
+    if not win:
+        text = "Вы упали"
+    else:
+        text = "Вы прошли уровень"
+    font = pygame.font.Font(None, 75)
+    rend = font.render(text, 1, pygame.Color((127, 199, 255)))
     intro_rect = rend.get_rect()
     intro_rect.top = 20
     intro_rect.x = 175
@@ -325,28 +336,6 @@ def game_over_screen(lev=False):
         pygame.display.flip()
         clock.tick(FPS)
 
-
-def game_over_screen_Levels():
-    fon = pygame.transform.scale(load_image('gameover.jpg'), screen_size)
-    screen.blit(fon, (0, 0))
-
-    font = pygame.font.Font(None, 125)
-    rend = font.render(f"Вы упали", 1, pygame.Color((127, 199, 255)))
-    intro_rect = rend.get_rect()
-    intro_rect.top = 20
-    intro_rect.x = 175
-    screen.blit(rend, intro_rect)
-
-    back_btn = "Меню"
-    font = pygame.font.Font(None, 100)
-    rend = font.render(back_btn, 1, pygame.Color((93, 155, 155)))
-    intro_rect_b = rend.get_rect()
-    intro_rect_b.top = 400
-    intro_rect_b.x = 200
-    intro_rect_b.width = 200
-    pygame.draw.rect(screen, pygame.Color(229, 228, 226), intro_rect_b)
-    pygame.draw.rect(screen, pygame.Color(93, 155, 155), intro_rect_b, 4)
-    screen.blit(rend, intro_rect_b)
 
 def training_screen():
     pass
