@@ -224,7 +224,7 @@ inf_back_img = load_image("background.png")
 game_over_sc = load_image("gameover.jpg")
 sur_img = load_image("suriken.png")
 bird_hunt_bg = load_image("birds_hunt.jpg")
-enemy_sheet_img = pygame.image.load("bird.png")
+enemy_sheet_img = load_image("bird.png")
 enemy_sheet = SpriteSheet(enemy_sheet_img)
 
 player = Player(SCREEN_WIDTH // 3, SCREEN_WIDTH - 200)
