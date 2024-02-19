@@ -216,7 +216,7 @@ class Suriken(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.kill()
 
-
+tutorial_image = load_image("tutorial.jpg")
 player_image = load_image("ninja.png")
 platform_image = load_image("platform.png")
 back_img = load_image("startback.png")
@@ -307,6 +307,9 @@ def start_screen():
 
 
 def levels_screen():
+    con = sqlite3.connect('data\statistic')
+    cur = con.cursor()
+    levels = cur.execute('SELECT * FROM Statistic').fetchone()
     empty_groups()
     intro_text = [" 1 ", " 2 ", " 3 ", " 4 "]
     buttons = []
@@ -362,15 +365,15 @@ def levels_screen():
                     level1()
 
                 if buttons[1].left <= event.pos[0] <= buttons[1].right and \
-                        buttons[1].top <= event.pos[1] <= buttons[1].bottom:
+                        buttons[1].top <= event.pos[1] <= buttons[1].bottom and levels[2] == 1:
                     level2()
 
                 if buttons[2].left <= event.pos[0] <= buttons[2].right and \
-                        buttons[2].top <= event.pos[1] <= buttons[2].bottom:
+                        buttons[2].top <= event.pos[1] <= buttons[2].bottom and levels[3] == 1:
                     level3()
 
                 if buttons[3].left <= event.pos[0] <= buttons[3].right and \
-                        buttons[3].top <= event.pos[1] <= buttons[3].bottom:
+                        buttons[3].top <= event.pos[1] <= buttons[3].bottom and levels[4] == 1:
                     level4()
 
         pygame.display.flip()
@@ -378,6 +381,9 @@ def levels_screen():
 
 
 def level1():
+    con = sqlite3.connect('data\statistic')
+    cur = con.cursor()
+
     score = 0
     bg_scroll = 0
     platform = Platform(150, SCREEN_HEIGHT - 100, 200, False)
@@ -455,6 +461,9 @@ def level1():
                 run = False
 
             if score >= 2000:
+                cur.execute('UPDATE Statistic SET Level2 = 1 WHERE id = 1')
+                con.commit()
+                con.close()
                 game_over_screen(score, False, True)
 
             if event.type == pygame.MOUSEBUTTONUP:
@@ -465,6 +474,8 @@ def level1():
 
 
 def level2():
+    con = sqlite3.connect('data\statistic')
+    cur = con.cursor()
     score = 0
     enemy_time = 0
     platform = Platform(100, 600, 250, False)
@@ -515,7 +526,10 @@ def level2():
         if pygame.sprite.spritecollide(player, enemy_group, False):
             game_over_screen(score, False, False)
 
-        if score >= 2000:
+        if score >= 1200:
+            cur.execute('UPDATE Statistic SET Level3 = 1 WHERE id = 1')
+            con.commit()
+            con.close()
             game_over_screen(score, False, True)
 
         pygame.draw.rect(screen, SAKURA_COLOR, (450, 0, 250, 700))
@@ -527,7 +541,7 @@ def level2():
         screen.blit(rend, lvl_rect)
 
         font = pygame.font.Font(None, 50)
-        rend = font.render(f"Цель: 2000", 1, LIGHT_BLUE_COLOR)
+        rend = font.render(f"Цель: 1200", 1, LIGHT_BLUE_COLOR)
         intro_rect = rend.get_rect()
         intro_rect.center = (575, 100)
         screen.blit(rend, intro_rect)
@@ -562,6 +576,8 @@ def level2():
 
 
 def level3():
+    con = sqlite3.connect('data\statistic')
+    cur = con.cursor()
     score = 0
     enemy_time = 0
     bg_scroll = 0
@@ -616,7 +632,10 @@ def level3():
         enemy_group.draw(screen)
         player.draw()
 
-        if score >= 2000:
+        if score >= 1200:
+            cur.execute('UPDATE Statistic SET Level4 = 1 WHERE id = 1')
+            con.commit()
+            con.close()
             game_over_screen(score, False, True)
 
         if player.rect.top >= SCREEN_HEIGHT - 80:
@@ -628,13 +647,13 @@ def level3():
         pygame.draw.rect(screen, SAKURA_COLOR, (450, 0, 250, 700))
 
         font = pygame.font.Font(None, 50)
-        rend = font.render(f"Уровень 1", 1, LIGHT_BLUE_COLOR)
+        rend = font.render(f"Уровень 3", 1, LIGHT_BLUE_COLOR)
         lvl_rect = rend.get_rect()
         lvl_rect.center = (575, 40)
         screen.blit(rend, lvl_rect)
 
         font = pygame.font.Font(None, 50)
-        rend = font.render(f"Цель: 2000", 1, LIGHT_BLUE_COLOR)
+        rend = font.render(f"Цель: 1200", 1, LIGHT_BLUE_COLOR)
         intro_rect = rend.get_rect()
         intro_rect.center = (575, 100)
         screen.blit(rend, intro_rect)
@@ -740,6 +759,17 @@ def level4():
         intro_rect.center = (575, 160)
         screen.blit(rend, intro_rect)
 
+        back_btn = " Назад "
+        font = pygame.font.Font(None, 50)
+        rend = font.render(back_btn, 1, LIGHT_BLUE_COLOR)
+        intro_rect_b = rend.get_rect()
+        intro_rect_b.top = 650
+        intro_rect_b.x = 570
+        intro_rect_b.width = 125
+        pygame.draw.rect(screen, INSIDE_BTN_COLOR, intro_rect_b)
+        pygame.draw.rect(screen, FRAME_BTN_COLOR, intro_rect_b, 4)
+        screen.blit(rend, intro_rect_b)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -777,7 +807,7 @@ def game_over_screen(score, inf_lev=False, win=False):
     intro_rect.center = (SCREEN_WIDTH // 2, 40)
     screen.blit(rend, intro_rect)
 
-    if inf_lev == True:
+    if inf_lev:
         back_btn = " Меню "
     else:
         back_btn = " К уровням "
@@ -805,7 +835,7 @@ def game_over_screen(score, inf_lev=False, win=False):
             if event.type == pygame.MOUSEBUTTONUP:
                 if intro_rect_b.left <= event.pos[0] <= intro_rect_b.right and \
                         intro_rect_b.top <= event.pos[1] <= intro_rect_b.bottom:
-                    if inf_lev == True:
+                    if inf_lev:
                         start_screen()
                     else:
                         levels_screen()
@@ -815,7 +845,65 @@ def game_over_screen(score, inf_lev=False, win=False):
 
 
 def training_screen():
-    pass
+    bg = pygame.transform.scale(tutorial_image, screen_size)
+    screen.blit(bg, (0, 0))
+    font = pygame.font.Font(None, 100)
+    text = "Управление"
+    rend = font.render(text, 1, SKY_COLOR)
+    intro_rect = rend.get_rect()
+    intro_rect.x = 150
+    intro_rect.y = 20
+    screen.blit(rend, intro_rect)
+
+    font = pygame.font.Font(None, 30)
+    text = "Чтобы двигаться влево/вправо используйте клавиши w/a или <-/->."
+    rend = font.render(text, 1, SKY_COLOR)
+    intro_rect = rend.get_rect()
+    intro_rect.x = 20
+    intro_rect.y = 100
+    screen.blit(rend, intro_rect)
+
+    font = pygame.font.Font(None, 25)
+    text = "На 3 и 4 уровне вам будут доступны сюрикены."
+    rend = font.render(text, 1, SKY_COLOR)
+    intro_rect = rend.get_rect()
+    intro_rect.x = 20
+    intro_rect.y = 150
+    screen.blit(rend, intro_rect)
+
+    font = pygame.font.Font(None, 25)
+    text = "Чтобы их использовать используйте пробел"
+    rend = font.render(text, 1, SKY_COLOR)
+    intro_rect = rend.get_rect()
+    intro_rect.x = 20
+    intro_rect.y = 180
+    screen.blit(rend, intro_rect)
+
+    font = pygame.font.Font(None, 50)
+    back_btn = "Назад"
+    rend = font.render(back_btn, 1, LIGHT_BLUE_COLOR)
+    intro_rect_b = rend.get_rect()
+    intro_rect_b.x = 20
+    intro_rect_b.y = 550
+    intro_rect_b.width = 225
+    pygame.draw.rect(screen, INSIDE_BTN_COLOR, intro_rect_b)
+    pygame.draw.rect(screen, FRAME_BTN_COLOR, intro_rect_b, 4)
+    screen.blit(rend, intro_rect_b)
+
+    screen.blit(rend, intro_rect_b)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                if intro_rect_b.left <= event.pos[0] <= intro_rect_b.right and \
+                        intro_rect_b.top <= event.pos[1] <= intro_rect_b.bottom:
+                    start_screen()
+
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 def infinity_game():
@@ -899,6 +987,13 @@ def infinity_game():
         intro_rect.x = 500
         screen.blit(rend, intro_rect)
 
+        font = pygame.font.Font(None, 50)
+        rend = font.render(f"Рекорд: {high_score}", 1, LIGHT_BLUE_COLOR)
+        intro_rect = rend.get_rect()
+        intro_rect.top = 130
+        intro_rect.x = 450
+        screen.blit(rend, intro_rect)
+
         back_btn = " Назад"
         font = pygame.font.Font(None, 50)
         rend = font.render(back_btn, 1, LIGHT_BLUE_COLOR)
@@ -937,7 +1032,6 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
         screen.fill((0, 0, 0))
-        board.render(screen)
         pygame.display.flip()
     pygame.quit()
 
